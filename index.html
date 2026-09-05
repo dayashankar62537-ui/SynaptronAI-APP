@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SynaptronAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0a12;
+    --sidebar: #100f18;
+    --surface: #17162200;
+    --surface-solid: #18172480;
+    --card: #1b1a28;
+    --card-hover: #22212f;
+    --border: #26243a;
+    --text: #f1f0f5;
+    --text-dim: #948fa8;
+    --text-faint: #605c72;
+    --accent: #8a6bff;
+    --accent-2: #45e0d8;
+    --accent-soft: rgba(138,107,255,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(900px 500px at 15% -10%, rgba(138,107,255,0.10), transparent 60%),
+      radial-gradient(700px 500px at 100% 10%, rgba(69,224,216,0.06), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    overflow:hidden;
+  }
+  .app{display:flex; height:100vh;}
+
+  /* Sidebar */
+  .sidebar{
+    width:264px; min-width:264px;
+    background:var(--sidebar);
+    border-right:1px solid var(--border);
+    display:flex; flex-direction:column;
+    padding:18px 14px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    padding:6px 8px 22px 8px;
+  }
+  .brand-mark{
+    width:30px; height:30px; border-radius:9px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; color:#0a0a12;
+    flex-shrink:0;
+  }
+  .brand-name{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16.5px; letter-spacing:0.2px;}
+
+  .new-chat{
+    display:flex; align-items:center; gap:9px;
+    background:var(--card); border:1px solid var(--border);
+    color:var(--text); font-family:'Inter',sans-serif; font-size:13.5px; font-weight:500;
+    padding:10px 13px; border-radius:10px; cursor:pointer;
+    transition:background .15s, border-color .15s;
+    margin-bottom:22px;
+  }
+  .new-chat:hover{background:var(--card-hover); border-color:#38354e;}
+
+  .side-label{
+    font-size:11.5px; color:var(--text-faint); padding:0 8px 8px 8px; font-weight:500;
+  }
+  .history{display:flex; flex-direction:column; gap:2px; overflow-y:auto; flex:1;}
+  .history-item{
+    padding:9px 10px; border-radius:8px; font-size:13px; color:var(--text-dim);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;
+  }
+  .history-item:hover{background:var(--card); color:var(--text);}
+
+  .side-footer{
+    border-top:1px solid var(--border); padding-top:12px; margin-top:10px;
+    display:flex; align-items:center; gap:10px; padding-left:8px;
+  }
+  .avatar{
+    width:26px; height:26px; border-radius:50%;
+    background:var(--card); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text-dim);
+  }
+  .side-footer-text{font-size:12.5px; color:var(--text-dim);}
+  .side-footer-sub{font-size:11px; color:var(--text-faint);}
+
+  /* Main */
+  .main{flex:1; display:flex; flex-direction:column; position:relative; min-width:0;}
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 26px; font-size:13px; color:var(--text-faint);
+  }
+  .topbar-badge{
+    display:flex; align-items:center; gap:7px;
+    border:1px solid var(--border); border-radius:20px; padding:5px 12px;
+    color:var(--text-dim);
+  }
+  .dot{width:6px; height:6px; border-radius:50%; background:var(--accent-2); box-shadow:0 0 8px var(--accent-2);}
+
+  .chat-scroll{
+    flex:1; overflow-y:auto;
+    display:flex; flex-direction:column; align-items:center;
+    padding:10px 24px 20px;
+  }
+  .chat-inner{width:100%; max-width:700px; display:flex; flex-direction:column; flex:1;}
+
+  /* Welcome */
+  .welcome{
+    flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;
+    text-align:center; gap:26px; padding-bottom:40px;
+  }
+  .welcome h1{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:29px; margin:0;
+    line-height:1.3;
+  }
+  .welcome p{color:var(--text-dim); font-size:14.5px; margin:0; max-width:420px; line-height:1.55;}
+
+  .cap-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:100%; max-width:620px;
+  }
+  .cap-card{
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:14px 14px 13px; text-align:left; cursor:pointer;
+    transition:border-color .15s, transform .15s, background .15s;
+  }
+  .cap-card:hover{border-color:var(--accent); background:var(--card-hover); transform:translateY(-2px);}
+  .cap-icon{font-size:17px; margin-bottom:8px; display:block;}
+  .cap-title{font-size:13px; font-weight:600; margin-bottom:3px;}
+  .cap-sub{font-size:11.5px; color:var(--text-faint); line-height:1.4;}
+
+  /* Messages */
+  .messages{display:flex; flex-direction:column; gap:20px; padding:14px 0 20px;}
+  .msg{display:flex; gap:12px; animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+  .msg-avatar{
+    width:28px; height:28px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:12px; margin-top:2px;
+  }
+  .msg.user .msg-avatar{background:var(--card); border:1px solid var(--border); color:var(--text-dim);}
+  .msg.ai .msg-avatar{background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a12; font-weight:700; font-family:'Space Grotesk',sans-serif;}
+  .msg-body{font-size:14.5px; line-height:1.65; color:var(--text); padding-top:3px; white-space:pre-wrap;}
+  .msg.user .msg-body{color:#ded9f5;}
+  .msg-name{font-size:12px; color:var(--text-faint); margin-bottom:3px; font-weight:500;}
+
+  .thinking{display:flex; gap:5px; padding:6px 0;}
+  .thinking span{
+    width:6px; height:6px; border-radius:50%; background:var(--accent);
+    animation:bounce 1.1s infinite ease-in-out;
+  }
+  .thinking span:nth-child(2){animation-delay:.15s;}
+  .thinking span:nth-child(3){animation-delay:.3s;}
+  @keyframes bounce{0%,80%,100%{opacity:.35; transform:translateY(0);} 40%{opacity:1; transform:translateY(-4px);}}
+
+  /* Input */
+  .input-wrap{width:100%; display:flex; justify-content:center; padding:0 24px 22px;}
+  .input-inner{width:100%; max-width:700px;}
+  .composer{
+    background:var(--card); border:1px solid var(--border); border-radius:18px;
+    padding:11px 12px 11px 16px; display:flex; align-items:flex-end; gap:10px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .composer:focus-within{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+  .composer textarea{
+    flex:1; resize:none; background:none; border:none; outline:none;
+    color:var(--text); font-family:'Inter',sans-serif; font-size:14.5px; line-height:1.5;
+    max-height:160px; padding:6px 0;
+  }
+  .composer textarea::placeholder{color:var(--text-faint);}
+  .icon-btn{
+    width:34px; height:34px; border-radius:10px; border:none; background:transparent;
+    color:var(--text-dim); cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:15px; flex-shrink:0; transition:background .15s, color .15s;
+  }
+  .icon-btn:hover{background:var(--card-hover); color:var(--text);}
+  .send-btn{
+    background:var(--accent); color:#0a0a12;
+  }
+  .send-btn:hover{background:#9c80ff; color:#0a0a12;}
+  .send-btn:disabled{opacity:.35; cursor:default;}
+  .send-btn:disabled:hover{background:var(--accent);}
+  .foot-note{text-align:center; font-size:11px; color:var(--text-faint); padding-top:10px;}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:#25233a; border-radius:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">SynaptronAI</div>
+    </div>
+    <button class="new-chat" onclick="resetChat()">
+      <span>＋</span> New chat
+    </button>
+    <div class="side-label">Recent</div>
+    <div class="history" id="history">
+      <div class="history-item">Bakery landing page copy</div>
+      <div class="history-item">Study plan — organic chemistry</div>
+      <div class="history-item">Sunset over mountains, digital art</div>
+      <div class="history-item">Weekly task breakdown</div>
+    </div>
+    <div class="side-footer">
+      <div class="avatar">CG</div>
+      <div>
+        <div class="side-footer-text">Punjab, India</div>
+        <div class="side-footer-sub">Free trial</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div></div>
+      <div class="topbar-badge"><span class="dot"></span> Synaptron core — online</div>
+    </div>
+
+    <div class="chat-scroll" id="chatScroll">
+      <div class="chat-inner" id="chatInner">
+        <div class="welcome" id="welcome">
+          <h1>What are we building today?</h1>
+          <p>One workspace for images, video, websites, apps, study help and everyday tasks. Ask in plain language.</p>
+          <div class="cap-grid">
+            <div class="cap-card" onclick="fillPrompt('Generate an image of ')">
+              <span class="cap-icon">🖼️</span>
+              <div class="cap-title">Image</div>
+              <div class="cap-sub">Concept art, mockups, social visuals</div>
+            </div>
+            <div class="cap-card" onclick="fillPrompt('Write a script for a short video about ')">
+              <span class="cap-icon">🎬</span>
+              <div class="cap-title">Video</div>
+              <div class="cap-sub">Ads, explainers, reels</div>
+            </div>
+            <div class="cap-card" onclick="fillPrompt('Help me plan a website for ')">
+              <span class="cap-icon">🌐</span>
+              <div class="cap-title">Website</div>
+              <div class="cap-sub">Layout, copy, structure</div>
+            </div>
+            <div class="cap-card" onclick="fillPrompt('Help me plan an app that ')">
+              <span class="cap-icon">📱</span>
+              <div class="cap-title">App</div>
+              <div class="cap-sub">Logic, screens, flow</div>
+            </div>
+            <div class="cap-card" onclick="fillPrompt('Make me a study plan for ')">
+              <span class="cap-icon">📚</span>
+              <div class="cap-title">Study</div>
+              <div class="cap-sub">Notes, summaries, exam prep</div>
+            </div>
+            <div class="cap-card" onclick="fillPrompt('Help me plan my day: ')">
+              <span class="cap-icon">🗒️</span>
+              <div class="cap-title">Assistant</div>
+              <div class="cap-sub">Plans, drafts, reminders</div>
+            </div>
+          </div>
+        </div>
+        <div class="messages" id="messages" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="input-wrap">
+      <div class="input-inner">
+        <div class="composer">
+          <button class="icon-btn" title="Attach">📎</button>
+          <textarea id="prompt" rows="1" placeholder="Message Synaptron..." onkeydown="handleKey(event)" oninput="autoGrow(this)"></textarea>
+          <button class="icon-btn send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+        </div>
+        <div class="foot-note">SynaptronAI can make mistakes. Check important info.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  let history = [];
+  let busy = false;
+
+  function autoGrow(el){
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }
+
+  function fillPrompt(text){
+    const el = document.getElementById('prompt');
+    el.value = text;
+    el.focus();
+    autoGrow(el);
+  }
+
+  function handleKey(e){
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function resetChat(){
+    history = [];
+    document.getElementById('messages').innerHTML = '';
+    document.getElementById('messages').style.display = 'none';
+    document.getElementById('welcome').style.display = 'flex';
+  }
+
+  function appendMessage(role, text){
+    const wrap = document.getElementById('messages');
+    document.getElementById('welcome').style.display = 'none';
+    wrap.style.display = 'flex';
+
+    const msg = document.createElement('div');
+    msg.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+    msg.innerHTML = `
+      <div class="msg-avatar">${role === 'user' ? '🙂' : 'S'}</div>
+      <div>
+        <div class="msg-name">${role === 'user' ? 'You' : 'Synaptron'}</div>
+        <div class="msg-body">${escapeHtml(text)}</div>
+      </div>`;
+    wrap.appendChild(msg);
+    scrollDown();
+    return msg.querySelector('.msg-body');
+  }
+
+  function appendThinking(){
+    const wrap = document.getElementById('messages');
+    const msg = document.createElement('div');
+    msg.className = 'msg ai';
+    msg.id = 'thinkingMsg';
+    msg.innerHTML = `
+      <div class="msg-avatar">S</div>
+      <div>
+        <div class="msg-name">Synaptron</div>
+        <div class="thinking"><span></span><span></span><span></span></div>
+      </div>`;
+    wrap.appendChild(msg);
+    scrollDown();
+  }
+
+  function removeThinking(){
+    const t = document.getElementById('thinkingMsg');
+    if(t) t.remove();
+  }
+
+  function scrollDown(){
+    const s = document.getElementById('chatScroll');
+    s.scrollTop = s.scrollHeight;
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.innerText = str;
+    return d.innerHTML;
+  }
+
+  async function sendMessage(){
+    if(busy) return;
+    const el = document.getElementById('prompt');
+    const text = el.value.trim();
+    if(!text) return;
+
+    el.value = '';
+    autoGrow(el);
+    appendMessage('user', text);
+    history.push({ role: 'user', content: text });
+
+    busy = true;
+    document.getElementById('sendBtn').disabled = true;
+    appendThinking();
+
+    try{
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          system: "You are Synaptron, the AI inside SynaptronAI, an all-in-one workspace for image generation, video generation, website building, app building, study help and personal assistance. Answer helpfully and concisely in the voice of a friendly, capable creative-and-technical assistant. If asked to 'generate' an image or video, describe what you would create in vivid detail instead of claiming to have generated a file.",
+          messages: history
+        })
+      });
+      const data = await response.json();
+      const textBlock = (data.content || []).find(b => b.type === 'text');
+      const reply = textBlock ? textBlock.text : "Sorry, I couldn't generate a response just now.";
+      removeThinking();
+      appendMessage('ai', reply);
+      history.push({ role: 'assistant', content: reply });
+    }catch(err){
+      removeThinking();
+      appendMessage('ai', "Something went wrong reaching Synaptron's core. Please try again.");
+      console.error(err);
+    }finally{
+      busy = false;
+      document.getElementById('sendBtn').disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
